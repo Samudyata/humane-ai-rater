@@ -365,7 +365,8 @@ exports.submitAnonymousRating = functions.https.onRequest(async (req, res) => {
       userPromptPreview,
       viewportTime,
       behaviorSignals,
-      timestamp
+      timestamp,
+      userRatings
     } = req.body;
 
     // Basic validation
@@ -386,7 +387,8 @@ exports.submitAnonymousRating = functions.https.onRequest(async (req, res) => {
       behaviorSignals: behaviorSignals || {},
       timestamp: timestamp || new Date().toISOString(),
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      source: 'extension'
+      source: 'extension',
+      userRatings: userRatings || null
     };
 
     const docRef = await db.collection('ratings').add(ratingDoc);

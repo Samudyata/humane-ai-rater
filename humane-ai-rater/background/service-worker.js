@@ -63,7 +63,10 @@ async function evaluate(userPrompt, aiResponse, model) {
     evaluation.overallScore = parseFloat(overallScore.toFixed(2));
 
     // Store the rating
-    await saveRatingBg(model, userPrompt, aiResponse, evaluation);
+    const savedRating = await saveRatingBg(model, userPrompt, aiResponse, evaluation);
+
+    // Include ratingId so the overlay can reference it when submitting user ratings
+    evaluation.ratingId = savedRating.id;
 
     return evaluation;
   } catch (err) {
@@ -333,6 +336,68 @@ async function fetchGlobalAggregates() {
   }
 }
 
+/**
+ * Submit user-adjusted ratings
+ * Updates the local rating and syncs to Firebase with user scores
+ */
+async function submitUserRating(ratingId, userScores, userOverallScore, userPrinciples, binaryVote) {
+  // Update the stored rating with user scores
+  const result = await chrome.storage.local.get('ratings');
+  const ratings = result.ratings || [];
+  const rating = ratings.find(r => r.id === ratingId);
+
+  if (rating) {
+    rating.userRatings = {
+      overallScore: userOverallScore,
+      principles: userPrinciples,
+      binaryVote: binaryVote || null,
+      submittedAt: new Date().toISOString()
+    };
+    await chrome.storage.local.set({ ratings });
+  }
+
+  // Sync user ratings to Firebase
+  const deviceHash = await getDeviceHash();
+  const payload = {
+    deviceHash,
+    platform: rating ? rating.model : 'unknown',
+    rating: userOverallScore >= 0 ? 'positive' : 'negative',
+    overallScore: rating ? rating.overallScore : 0,
+    principles: rating ? rating.principles : [],
+    userPromptPreview: rating ? rating.userPrompt.substring(0, 100) : '',
+    viewportTime: 2000,
+    behaviorSignals: {
+      hasMouseMoved: true,
+      hasTouched: false,
+      documentVisible: true
+    },
+    timestamp: rating ? rating.timestamp : new Date().toISOString(),
+    userRatings: {
+      overallScore: userOverallScore,
+      principles: userPrinciples,
+      binaryVote: binaryVote || null
+    }
+  };
+
+  try {
+    const response = await fetch(`${FIREBASE_FUNCTIONS_URL}/submitAnonymousRating`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Firebase sync failed: ${response.status}`);
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.warn('Firebase user rating sync failed (non-blocking):', err.message);
+    // Still return success since local storage was updated
+    return { success: true, firebaseSyncFailed: true };
+  }
+}
+
 // --- Message listener ---
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -381,6 +446,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'clearData') {
     chrome.storage.local.remove(['ratings', 'leaderboard'])
       .then(() => sendResponse({ success: true }))
+      .catch(err => sendResponse({ error: err.message }));
+    return true;
+  }
+
+  if (message.type === 'submitUserRating') {
+    submitUserRating(message.ratingId, message.userScores, message.userOverallScore, message.userPrinciples, message.binaryVote)
+      .then(result => sendResponse(result))
       .catch(err => sendResponse({ error: err.message }));
     return true;
   }

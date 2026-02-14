@@ -1,14 +1,13 @@
 /**
  * Popup Script - Humane AI Rater
- * Benchmark scores, dimension sliders, leaderboard, recent ratings, settings.
+ * Dimension sliders, leaderboard, recent ratings, settings.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  initBenchmark();
+  initData();
   initTabs();
   initMoreToggle();
   initSettings();
-  initThumbs();
   initHistory();
   initTimeFilter();
   loadLeaderboard();
@@ -43,12 +42,7 @@ const URL_TO_MODEL = [
 let allRatings = [];
 let currentChatbot = null;
 
-// ─── Score Conversion ────────────────────────────
-
-/** Map -1..1 score to 1..5 display scale */
-function toFivePoint(score) {
-  return (score + 1) * 2 + 1;
-}
+// ─── Score Helpers ──────────────────────────────
 
 function getColor(score) {
   if (score >= 0.75) return '#10b981';
@@ -71,7 +65,13 @@ function getBgClass(score) {
   return 'bg-violation';
 }
 
-// ─── Benchmark & Dimensions ──────────────────────
+/** Format -1..1 score for display with sign */
+function formatScore(score) {
+  const s = score.toFixed(1);
+  return score > 0 ? `+${s}` : s;
+}
+
+// ─── Data & Dimensions ──────────────────────────
 
 async function detectCurrentChatbot() {
   try {
@@ -85,14 +85,13 @@ async function detectCurrentChatbot() {
   return null;
 }
 
-async function initBenchmark() {
+async function initData() {
   try {
     allRatings = await sendMessage({ type: 'getRatings' }) || [];
     currentChatbot = await detectCurrentChatbot();
   } catch (err) {
     allRatings = [];
   }
-  updateBenchmarkScore();
   updateScoreCircle();
   renderDimensions();
 }
@@ -119,8 +118,7 @@ function updateScoreCircle() {
   }
 
   const avg = ratings.reduce((sum, r) => sum + r.overallScore, 0) / ratings.length;
-  const fivePoint = toFivePoint(avg);
-  valueEl.textContent = fivePoint.toFixed(1);
+  valueEl.textContent = formatScore(avg);
   circle.style.background = getCircleColor(avg);
 }
 
@@ -128,20 +126,6 @@ function getRelevantRatings() {
   return currentChatbot
     ? allRatings.filter(r => r.model === currentChatbot)
     : allRatings;
-}
-
-function updateBenchmarkScore() {
-  const scoreEl = document.getElementById('benchmarkScore');
-  const ratings = getRelevantRatings();
-
-  if (!ratings || ratings.length === 0) {
-    scoreEl.textContent = '--';
-    return;
-  }
-
-  const avg = ratings.reduce((sum, r) => sum + r.overallScore, 0) / ratings.length;
-  const fivePoint = toFivePoint(avg);
-  scoreEl.textContent = fivePoint.toFixed(1);
 }
 
 function renderDimensions() {
@@ -163,23 +147,23 @@ function renderDimensions() {
   });
   dimAvgs.forEach((_, i) => { dimAvgs[i] /= ratings.length; });
 
-  container.innerHTML = dimAvgs.map((avg, i) => {
-    const fivePoint = toFivePoint(avg);
-    return renderSlider(DIM_LABELS[i], fivePoint, DIM_FULL_NAMES[i]);
-  }).join('');
+  container.innerHTML = dimAvgs.map((avg, i) =>
+    renderSlider(DIM_LABELS[i], avg, DIM_FULL_NAMES[i])
+  ).join('');
 }
 
 function renderSlider(label, value, tooltip) {
   const hasData = value !== null && value !== undefined;
-  const rounded = hasData ? Math.max(1, Math.min(5, Math.round(value))) : 0;
-  const fillPct = hasData ? ((value - 1) / 4) * 100 : 0;
-  const clampedFill = Math.max(0, Math.min(100, fillPct));
+  const dotLabels = ['-1', '-.5', '0', '.5', '1'];
+  // Map -1..1 to dot index 0..4
+  const dotIndex = hasData ? Math.max(0, Math.min(4, Math.round((value + 1) * 2))) : -1;
+  const fillPct = hasData ? Math.max(0, Math.min(100, ((value + 1) / 2) * 100)) : 0;
 
   let dotsHtml = '';
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 0; i < 5; i++) {
     let cls = 'slider-dot';
-    if (hasData && i < rounded) cls += ' passed';
-    if (hasData && i === rounded) cls += ' active';
+    if (hasData && i < dotIndex) cls += ' passed';
+    if (hasData && i === dotIndex) cls += ' active';
     dotsHtml += `<div class="${cls}"></div>`;
   }
 
@@ -188,12 +172,12 @@ function renderSlider(label, value, tooltip) {
       <div class="slider-title">${label}</div>
       <div class="slider-track-wrapper">
         <div class="slider-track">
-          <div class="slider-fill" style="width: ${clampedFill}%"></div>
+          <div class="slider-fill" style="width: ${fillPct}%"></div>
         </div>
         <div class="slider-dots">${dotsHtml}</div>
       </div>
       <div class="slider-numbers">
-        <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+        ${dotLabels.map(l => `<span>${l}</span>`).join('')}
       </div>
     </div>
   `;
@@ -222,33 +206,6 @@ function initMoreToggle() {
     const isOpen = section.classList.toggle('open');
     btn.textContent = isOpen ? 'less...' : 'more...';
   });
-}
-
-// ─── Thumbs Up/Down ──────────────────────────────
-
-function initThumbs() {
-  const upBtn = document.getElementById('thumbUp');
-  const downBtn = document.getElementById('thumbDown');
-
-  // Load existing vote
-  chrome.storage.local.get('userVote', (data) => {
-    if (data.userVote) {
-      if (data.userVote === 'up') upBtn.classList.add('selected');
-      if (data.userVote === 'down') downBtn.classList.add('selected');
-    }
-  });
-
-  upBtn.addEventListener('click', () => toggleVote('up', upBtn, downBtn));
-  downBtn.addEventListener('click', () => toggleVote('down', downBtn, upBtn));
-}
-
-function toggleVote(vote, activeBtn, otherBtn) {
-  const wasSelected = activeBtn.classList.contains('selected');
-  activeBtn.classList.toggle('selected');
-  otherBtn.classList.remove('selected');
-
-  const newVote = wasSelected ? null : vote;
-  chrome.storage.local.set({ userVote: newVote });
 }
 
 // ─── Settings ────────────────────────────────────
@@ -289,7 +246,7 @@ function initSettings() {
     try {
       await sendMessage({ type: 'clearData' });
       allRatings = [];
-      updateBenchmarkScore();
+      updateScoreCircle();
       renderDimensions();
       loadLeaderboard();
       loadRecent();
@@ -337,7 +294,6 @@ async function loadLeaderboard() {
       .sort((a, b) => b.avgScore - a.avgScore);
 
     container.innerHTML = sorted.map((entry, i) => {
-      const fivePoint = toFivePoint(entry.avgScore);
       const color = getColor(entry.avgScore);
       const label = getLabel(entry.avgScore);
       return `
@@ -348,7 +304,7 @@ async function loadLeaderboard() {
             <div class="lb-count">${entry.count} rating${entry.count !== 1 ? 's' : ''}</div>
           </div>
           <div>
-            <div class="lb-score" style="color: ${color}">${fivePoint.toFixed(1)}</div>
+            <div class="lb-score" style="color: ${color}">${formatScore(entry.avgScore)}</div>
             <div class="lb-label">${label}</div>
           </div>
         </div>`;
@@ -374,7 +330,6 @@ async function loadRecent() {
     const shortLabels = ['Emp', 'Mean', 'Supp', 'Sec', 'Hon', 'Resp', 'Trns', 'Incl'];
 
     container.innerHTML = ratings.slice(0, 10).map((rating, idx) => {
-      const fivePoint = toFivePoint(rating.overallScore);
       const color = getColor(rating.overallScore);
 
       return `
@@ -382,7 +337,7 @@ async function loadRecent() {
           <div class="recent-header">
             <span class="recent-model">${rating.model}</span>
             <div class="recent-header-right">
-              <span class="recent-score" style="color: ${color}">${fivePoint.toFixed(1)}</span>
+              <span class="recent-score" style="color: ${color}">${formatScore(rating.overallScore)}</span>
               <button class="share-btn" data-idx="${idx}" title="Copy as image">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
@@ -399,10 +354,9 @@ async function loadRecent() {
             ${rating.principles.map((p, i) => {
               const pc = getColor(p.score);
               const bgClass = getBgClass(p.score);
-              const pFive = toFivePoint(p.score);
               return `
-                <div class="recent-principle ${bgClass}" title="${p.name}: ${pFive.toFixed(1)}">
-                  <span class="p-score" style="color: ${pc}">${pFive.toFixed(1)}</span>
+                <div class="recent-principle ${bgClass}" title="${p.name}: ${formatScore(p.score)}">
+                  <span class="p-score" style="color: ${pc}">${formatScore(p.score)}</span>
                   <span class="p-name">${shortLabels[i]}</span>
                 </div>`;
             }).join('')}
@@ -630,8 +584,7 @@ function renderHistorySummary(ratings) {
   }
 
   const avg = ratings.reduce((sum, r) => sum + r.overallScore, 0) / ratings.length;
-  const fivePoint = toFivePoint(avg);
-  bigScore.textContent = fivePoint.toFixed(1);
+  bigScore.textContent = formatScore(avg);
   bigCircle.style.background = getCircleColor(avg);
   countEl.textContent = ratings.length;
   labelEl.textContent = getLabel(avg);
@@ -656,14 +609,13 @@ function renderHistoryDimensions(ratings) {
   container.innerHTML = dimAvgs.map((avg, i) => {
     const pct = ((avg + 1) / 2) * 100;
     const color = getColor(avg);
-    const fivePoint = toFivePoint(avg);
     return `
       <div class="dim-row">
         <span class="dim-name">${DIM_FULL_NAMES[i]}</span>
         <div class="dim-bar-track">
           <div class="dim-bar-fill" style="width: ${pct}%; background: ${color}"></div>
         </div>
-        <span class="dim-value" style="color: ${color}">${fivePoint.toFixed(1)}</span>
+        <span class="dim-value" style="color: ${color}">${formatScore(avg)}</span>
       </div>`;
   }).join('');
 }
@@ -678,12 +630,11 @@ function renderHistoryList(ratings) {
 
   container.innerHTML = ratings.map(r => {
     const color = getColor(r.overallScore);
-    const fivePoint = toFivePoint(r.overallScore);
     return `
       <div class="history-item">
         <div class="history-item-header">
           <span class="history-item-model">${escapeHtml(r.model)}</span>
-          <span class="history-item-score" style="color: ${color}">${fivePoint.toFixed(1)}</span>
+          <span class="history-item-score" style="color: ${color}">${formatScore(r.overallScore)}</span>
         </div>
         <div class="history-item-prompt">${escapeHtml(r.userPrompt)}</div>
         <div class="history-item-time">${timeAgo(r.timestamp)}</div>

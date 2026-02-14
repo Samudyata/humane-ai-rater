@@ -11,23 +11,17 @@
 
     <!-- Header -->
     <header class="popup-header">
-      <div class="logo">
-        <img src="../icons/HumaneAIRater-Logo.jpg" alt="Humane AI Rater" class="logo-img">
-        <div class="logo-text">
-          <span class="logo-humane">Humane</span>
-          <span class="logo-rater">AI RATER</span>
-        </div>
-      </div>
+      <img src="../media/HumaneAIRater-Logo-Text.jpg" alt="Humane AI Rater by Building Humane Tech" class="banner-img">
       <div class="header-actions">
         <span class="score-circle-label" id="scoreCircleLabel"></span>
         <button class="score-circle" id="scoreCircle" title="View your rating history">
           <span id="scoreCircleValue">--</span>
         </button>
         <button class="gear-btn" id="gearBtn" title="Settings">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
         </button>
       </div>
     </header>
@@ -35,38 +29,12 @@
     <!-- Main scrollable content -->
     <div class="main-content">
 
-      <!-- Benchmark Card -->
-      <div class="card benchmark-card">
-        <div class="card-label">HUMANE BENCHMARK</div>
-        <div class="benchmark-body">
-          <p class="benchmark-text">Before you use this chatbot, here is the overall rating:</p>
-          <div class="benchmark-score" id="benchmarkScore">--</div>
-        </div>
-      </div>
-
-      <!-- Your Rating Card -->
-      <div class="card rating-card">
-        <div class="card-label">YOUR RATING</div>
-        <div class="rating-body">
-          <span class="rating-text">How accurate is this?</span>
-          <div class="rating-thumbs">
-            <button class="thumb-btn" id="thumbUp" data-vote="up">&#x1F44D;</button>
-            <button class="thumb-btn" id="thumbDown" data-vote="down">&#x1F44E;</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- More toggle -->
-      <div class="more-toggle">
-        <button class="more-btn" id="moreBtn">more...</button>
-      </div>
-
-      <!-- Expandable: Leaderboard & Recent -->
-      <div class="expanded-section" id="expandedSection">
-        <nav class="tabs">
-          <button class="tab active" data-tab="leaderboard">Leaderboard</button>
-          <button class="tab" data-tab="recent">Recent</button>
-        </nav>
+      <!-- Leaderboard / Recent Tabs (always visible) -->
+      <nav class="tabs">
+        <button class="tab active" data-tab="leaderboard">Leaderboard</button>
+        <button class="tab" data-tab="recent">Recent</button>
+      </nav>
+      <div class="tab-panels">
         <section class="tab-content active" id="tab-leaderboard">
           <div class="leaderboard" id="leaderboardContainer">
             <div class="empty-state"><p>No ratings yet.</p><p class="muted">Visit ChatGPT or Claude and rate some responses!</p></div>
@@ -79,13 +47,20 @@
         </section>
       </div>
 
-      <!-- 8 Dimension Sliders -->
-      <div class="dimensions" id="dimensionsContainer"></div>
+      <!-- More toggle for dimension details -->
+      <div class="more-toggle">
+        <button class="more-btn" id="moreBtn">more...</button>
+      </div>
+
+      <!-- Collapsible: 8 Dimension Sliders -->
+      <div class="expanded-section" id="expandedSection">
+        <div class="dimensions" id="dimensionsContainer"></div>
+      </div>
 
       <!-- Credits -->
       <div class="credits">
         <div class="credits-label">HUMANE CREATORS</div>
-        <p class="credits-names">Samudyata Jagirdai, Abhijit Sethi, Andrew Quintana, AnneMarie Ward</p>
+        <p class="credits-names">Samudyata Jagirdar, Abhijit Sethi, Andrew Quintana, AnneMarie Ward</p>
       </div>
 
     </div>
@@ -102,7 +77,6 @@
           </svg>
         </button>
       </div>
-
       <div class="history-score-summary">
         <div class="history-big-circle" id="historyBigCircle">
           <span id="historyBigScore">--</span>
@@ -118,7 +92,6 @@
           </div>
         </div>
       </div>
-
       <div class="history-filters">
         <div class="filter-group">
           <label class="filter-label">Model</label>
@@ -136,7 +109,6 @@
           </div>
         </div>
       </div>
-
       <div class="history-dimensions" id="historyDimensions"></div>
       <div class="history-list" id="historyList"></div>
     </div>

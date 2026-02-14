@@ -46,39 +46,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px 10px;
+  padding: 10px 16px 6px;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.logo-img {
-  width: 44px;
-  height: auto;
+.banner-img {
+  height: 65px;
+  width: auto;
   object-fit: contain;
-}
-
-.logo-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.15;
-}
-
-.logo-humane {
-  font-size: 18px;
-  font-style: italic;
-  font-weight: 600;
-  color: var(--teal);
-}
-
-.logo-rater {
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--dark);
-  letter-spacing: 0.5px;
 }
 
 .header-actions {
@@ -246,25 +220,32 @@ body {
   color: var(--teal);
 }
 
-/* ─── Expanded Section ────────────────────────── */
+/* Tabs (always visible) */
+.tabs {
+  display: flex;
+  background: var(--gray-100);
+  border-radius: 10px 10px 0 0;
+  border: 1px solid var(--gray-200);
+  border-bottom: none;
+}
+
+.tab-panels {
+  border: 1px solid var(--gray-200);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+/* ─── Expanded Section (dimension sliders) ────── */
 
 .expanded-section {
   display: none;
   margin-bottom: 16px;
-  border: 1px solid var(--gray-200);
-  border-radius: 12px;
-  overflow: hidden;
 }
 
 .expanded-section.open {
   display: block;
-}
-
-/* Tabs */
-.tabs {
-  display: flex;
-  background: var(--gray-100);
-  border-bottom: 1px solid var(--gray-200);
 }
 
 .tab {
@@ -556,11 +537,12 @@ body {
 }
 
 .slider-numbers span {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   color: var(--teal);
-  width: 20px;
+  width: 28px;
   text-align: center;
+  white-space: nowrap;
 }
 
 /* Empty slider (no data) */
