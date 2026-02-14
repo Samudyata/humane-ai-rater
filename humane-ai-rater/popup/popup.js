@@ -247,16 +247,36 @@ async function screenshotCard(cardElement, shareBtn) {
     // Restore share button
     shareBtn.style.visibility = '';
 
-    // Copy to clipboard
+    // Convert to blob
     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-    await navigator.clipboard.write([
-      new ClipboardItem({ 'image/png': blob })
-    ]);
+    const file = new File([blob], 'humane-score.png', { type: 'image/png' });
+
+    // Get score info for share text
+    const scoreEl = cardElement.querySelector('.recent-score');
+    const modelEl = cardElement.querySelector('.recent-model');
+    const score = scoreEl ? scoreEl.textContent.trim() : '';
+    const model = modelEl ? modelEl.textContent.trim() : 'AI';
+    const shareText = `${model} scored ${score} on the HumaneBench humaneness rating! Check how humane your AI is.`;
+
+    // Try Web Share API first (works on mobile + some desktop)
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        title: 'HumaneBench Score',
+        text: shareText,
+        files: [file]
+      });
+      showToast('Shared!');
+    } else {
+      // Fallback: copy to clipboard
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+      showToast('Copied to Clipboard!');
+    }
 
     // Success feedback
     shareBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
     shareBtn.classList.add('share-success');
-    showToast('Copied to Clipboard!');
 
     setTimeout(() => {
       shareBtn.innerHTML = originalHTML;
@@ -265,7 +285,14 @@ async function screenshotCard(cardElement, shareBtn) {
     }, 1500);
 
   } catch (err) {
-    console.error('Screenshot failed:', err);
+    // User cancelled share dialog - not an error
+    if (err.name === 'AbortError') {
+      shareBtn.innerHTML = originalHTML;
+      shareBtn.disabled = false;
+      return;
+    }
+
+    console.error('Share failed:', err);
     shareBtn.style.visibility = '';
     shareBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
 
