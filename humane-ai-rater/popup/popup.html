@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Humane AI Rater</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+
+    <!-- Header -->
+    <header class="popup-header">
+      <img src="../media/HumaneAIRater-Logo-Text.jpg" alt="Humane AI Rater by Building Humane Tech" class="banner-img">
+      <div class="header-actions">
+        <span class="score-circle-label" id="scoreCircleLabel"></span>
+        <button class="score-circle" id="scoreCircle" title="View your rating history">
+          <span id="scoreCircleValue">--</span>
+        </button>
+        <button class="gear-btn" id="gearBtn" title="Settings">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main scrollable content -->
+    <div class="main-content">
+
+      <!-- Leaderboard / Recent Tabs (always visible) -->
+      <nav class="tabs">
+        <button class="tab active" data-tab="leaderboard">Leaderboard</button>
+        <button class="tab" data-tab="recent">Recent</button>
+      </nav>
+      <div class="tab-panels">
+        <section class="tab-content active" id="tab-leaderboard">
+          <div class="leaderboard" id="leaderboardContainer">
+            <div class="empty-state"><p>No ratings yet.</p><p class="muted">Visit ChatGPT or Claude and rate some responses!</p></div>
+          </div>
+        </section>
+        <section class="tab-content" id="tab-recent">
+          <div class="recent-list" id="recentContainer">
+            <div class="empty-state"><p>No ratings yet.</p></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- More toggle for dimension details -->
+      <div class="more-toggle">
+        <button class="more-btn" id="moreBtn">more...</button>
+      </div>
+
+      <!-- Collapsible: 8 Dimension Sliders -->
+      <div class="expanded-section" id="expandedSection">
+        <div class="dimensions" id="dimensionsContainer"></div>
+      </div>
+
+      <!-- Credits -->
+      <div class="credits">
+        <div class="credits-label">HUMANE CREATORS</div>
+        <p class="credits-names">Samudyata Jagirdar, Abhijit Sethi, Andrew Quintana, AnneMarie Ward</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- History Overlay -->
+  <div class="history-overlay" id="historyOverlay">
+    <div class="history-panel">
+      <div class="history-header">
+        <h2>Rating History</h2>
+        <button class="close-btn" id="closeHistoryBtn" title="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="history-score-summary">
+        <div class="history-big-circle" id="historyBigCircle">
+          <span id="historyBigScore">--</span>
+        </div>
+        <div class="history-stats">
+          <div class="history-stat">
+            <span class="stat-value" id="historyCount">0</span>
+            <span class="stat-label">ratings</span>
+          </div>
+          <div class="history-stat">
+            <span class="stat-value" id="historyLabel">N/A</span>
+            <span class="stat-label">overall</span>
+          </div>
+        </div>
+      </div>
+      <div class="history-filters">
+        <div class="filter-group">
+          <label class="filter-label">Model</label>
+          <div class="filter-pills" id="modelFilter">
+            <button class="pill active" data-model="all">All</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Time Range</label>
+          <div class="filter-pills" id="timeFilter">
+            <button class="pill active" data-time="all">All Time</button>
+            <button class="pill" data-time="30">30d</button>
+            <button class="pill" data-time="7">7d</button>
+            <button class="pill" data-time="1">Today</button>
+          </div>
+        </div>
+      </div>
+      <div class="history-dimensions" id="historyDimensions"></div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </div>
+
+  <!-- Settings Overlay -->
+  <div class="settings-overlay" id="settingsOverlay">
+    <div class="settings-panel">
+      <div class="settings-header">
+        <h2>Settings</h2>
+        <button class="close-btn" id="closeSettingsBtn" title="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="settings-body">
+        <div class="settings-group">
+          <label class="settings-label" for="apiKeyInput">Gemini API Key</label>
+          <div class="api-key-row">
+            <input type="password" id="apiKeyInput" placeholder="Enter your Gemini API key" autocomplete="off">
+            <button id="saveKeyBtn" class="btn-primary">Save</button>
+          </div>
+          <p class="settings-help">
+            Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a>
+          </p>
+          <div id="keyStatus" class="key-status"></div>
+        </div>
+        <div class="settings-group">
+          <label class="settings-label">Data</label>
+          <button id="clearDataBtn" class="btn-danger">Clear All Ratings</button>
+          <p class="settings-help">This removes all stored ratings and leaderboard data.</p>
+        </div>
+        <div class="settings-group">
+          <label class="settings-label">About</label>
+          <p class="settings-help">
+            Evaluates AI chatbot responses against the
+            <a href="https://humanebench.ai" target="_blank">HumaneBench</a>
+            8 Humane Technology Principles.
+          </p>
+          <p class="settings-help muted">v1.0.0 | Building Humane Tech Hackathon</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared/html2canvas.min.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

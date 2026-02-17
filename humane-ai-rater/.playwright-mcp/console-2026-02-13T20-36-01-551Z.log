@@ -1,0 +1,5 @@
+[     508ms] [ERROR] Access to fetch at 'https://your_project.cloudfunctions.net/getAggregates' from origin 'http://localhost:8765' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:8765/web/index.html:0
+[     508ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://your_project.cloudfunctions.net/getAggregates:0
+[     508ms] [ERROR] Error loading leaderboard: TypeError: Failed to fetch
+    at loadLeaderboard (http://localhost:8765/web/index.html:382:32)
+    at http://localhost:8765/web/index.html:488:5 @ http://localhost:8765/web/index.html:387

@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx firebase:*)",
+      "Bash(curl:*)",
+      "Bash(firebase emulators:start:*)",
+      "Bash(java -version:*)",
+      "Bash(brew install:*)",
+      "Bash(export JAVA_HOME:*)",
+      "Bash(export PATH=\"$JAVA_HOME/bin:$PATH\")",
+      "Bash(BASE_URL=\"http://127.0.0.1:5001/demo-humane-ai-rater/us-central1\":*)",
+      "Bash(ID_TOKEN=\"eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImF1dGhfdGltZSI6MTc3MTAyMTc0MCwidXNlcl9pZCI6InZ4N2kzYjdJZklxeE5KbUZNem5Hc1VPMExTNngiLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbInRlc3RAZXhhbXBsZS5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9LCJpYXQiOjE3NzEwMjE3NDAsImV4cCI6MTc3MTAyNTM0MCwiYXVkIjoiZGVtby1odW1hbmUtYWktcmF0ZXIiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZGVtby1odW1hbmUtYWktcmF0ZXIiLCJzdWIiOiJ2eDdpM2I3SWZJcXhOSm1GTXpuR3NVTzBMUzZ4In0.\")",
+      "Bash(__NEW_LINE_c42300be948da97c__ echo \"==========================================\")",
+      "Bash(python3:*)",
+      "Bash(true echo \"\" echo \"==========================================\" echo \"TEST 2: POST /createUserProfile \\(existing user - should return 200\\)\" echo \"==========================================\" curl -s -w \"\\\\nHTTP_STATUS: %{http_code}\\\\n\" -X POST \"$BASE_URL/createUserProfile\"  -H \"Content-Type: application/json\"  -H \"Authorization: Bearer $ID_TOKEN\"  -d '{\"\"displayName\"\":\"\"Test User\"\"}')",
+      "Bash(node:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs:*)",
+      "Bash(git stash:*)",
+      "Bash(ls:*)",
+      "Bash(git ls-tree:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(git add:*)",
+      "Bash(export PATH=\"/opt/homebrew/bin:$JAVA_HOME/bin:$PATH\")",
+      "Bash(git fetch:*)",
+      "Bash(git commit:*)",
+      "Bash(git -C /Users/aq_home/1Projects/humane-ai-rater log --oneline -15)",
+      "Bash(sips:*)"
+    ]
+  }
+}

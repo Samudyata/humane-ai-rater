@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to validate rating data structure
+    function validateRating(data) {
+      return data.rating in ['positive', 'negative']
+        && data.platform in ['chatgpt', 'claude', 'gemini', 'grok']
+        && data.timestamp is number
+        && data.deviceHash is string
+        && data.deviceHash.size() == 64
+        && data.responseLength is number
+        && data.responseLength > 0
+        && data.responseLength < 100000;
+    }
+
+    // Helper to check rate limiting
+    function isRateLimited(deviceHash) {
+      let today = request.time.toMillis() / 86400000;
+      let limitDoc = get(/databases/$(database)/documents/rateLimits/$(deviceHash)/$(string(int(today))));
+      return limitDoc.exists && limitDoc.data.count >= 50;
+    }
+
+    // Ratings collection
+    // - Anyone can create (submit ratings)
+    // - No direct read access (privacy protection)
+    // - Only Cloud Functions can update/delete
+    match /ratings/{ratingId} {
+      allow create: if validateRating(request.resource.data);
+      allow read: if false;  // No direct access to individual ratings
+      allow update, delete: if false;  // Only Cloud Functions via admin SDK
+    }
+
+    // Rate limits collection (managed by Cloud Functions)
+    match /rateLimits/{deviceHash}/{dayId} {
+      allow read: if false;
+      allow write: if false;  // Only Cloud Functions
+    }
+
+    // Aggregates collection (public leaderboard data)
+    // - Anyone can read aggregate scores
+    // - Only Cloud Functions can write (computed from ratings)
+    match /aggregates/{platform} {
+      allow read: if true;
+      allow write: if false;  // Only Cloud Functions
+    }
+
+    // Global stats (total ratings count, etc.)
+    match /stats/{statId} {
+      allow read: if true;
+      allow write: if false;  // Only Cloud Functions
+    }
+
+    // Flagged ratings for manual review
+    match /flagged/{ratingId} {
+      allow read: if false;
+      allow write: if false;  // Only Cloud Functions
+    }
+
+    // User profiles (managed by Cloud Functions, read by owner)
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;  // Only Cloud Functions via admin SDK
+    }
+
+    // User ratings (managed by Cloud Functions, read by owner)
+    match /user_ratings/{ratingId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow write: if false;  // Only Cloud Functions via admin SDK
+    }
+  }
+}

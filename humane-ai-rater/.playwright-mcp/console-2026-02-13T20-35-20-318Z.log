@@ -1,0 +1,7 @@
+[      35ms] [ERROR] Error loading leaderboard: TypeError: Cannot read properties of undefined (reading 'sendMessage')
+    at loadLeaderboard (http://localhost:8765/extension/popup/popup.js:23:43)
+    at HTMLDocument.<anonymous> (http://localhost:8765/extension/popup/popup.js:4:9) @ http://localhost:8765/extension/popup/popup.js:31
+[      36ms] [ERROR] Error loading local stats: TypeError: Cannot read properties of undefined (reading 'sendMessage')
+    at loadLocalStats (http://localhost:8765/extension/popup/popup.js:133:43)
+    at HTMLDocument.<anonymous> (http://localhost:8765/extension/popup/popup.js:5:9) @ http://localhost:8765/extension/popup/popup.js:139
+[      57ms] [ERROR] Failed to load resource: the server responded with a status of 404 (File not found) @ http://localhost:8765/favicon.ico:0
